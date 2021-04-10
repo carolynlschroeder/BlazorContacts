@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BlazorContactsApi;
-using Shared;
+using BlazorContactsApi.Data;
 
 namespace BlazorContactsApi.Controllers
 {
@@ -42,48 +42,54 @@ namespace BlazorContactsApi.Controllers
             return contact;
         }
 
-        // PUT: api/Contacts/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Contact contact)
+        [Microsoft.AspNetCore.Mvc.HttpPut("{id}")]
+        public IActionResult Put(int id, [Microsoft.AspNetCore.Mvc.FromBody] Contact contact)
         {
-            if (id != contact.Id)
+            if (contact == null || contact.Id != id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(contact).State = EntityState.Modified;
+            if (_context.Contacts.AsNoTracking().FirstOrDefault(c => c.Id == id) == null)
+            {
+                return NotFound();
+            }
 
             try
             {
-                await _context.SaveChangesAsync();
+                var entry = _context.Entry(contact);
+                entry.State = EntityState.Modified;
+                _context.SaveChanges();
+                return new NoContentResult();
             }
-            catch (DbUpdateConcurrencyException)
+            catch
             {
-                if (!ContactExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
-            return NoContent();
         }
 
         // POST: api/Contacts
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<Contact>> Post(Contact contact)
+        [Microsoft.AspNetCore.Mvc.HttpPost]
+        public IActionResult Post([Microsoft.AspNetCore.Mvc.FromBody] Contact contact)
         {
-            _context.Contacts.Add(contact);
-            await _context.SaveChangesAsync();
+            if (contact == null)
+            {
+                return BadRequest();
+            }
 
-            return CreatedAtAction("Get", new { id = contact.Id }, contact);
+            try
+            {
+                _context.Contacts.Add(contact);
+                _context.SaveChanges();
+                return CreatedAtRoute("GetContact", new { id = contact.Id }, contact);
+
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         // DELETE: api/Contacts/5

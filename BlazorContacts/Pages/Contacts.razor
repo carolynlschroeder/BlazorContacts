@@ -1,0 +1,57 @@
+﻿@page "/contacts"
+@using BlazorContacts.Shared
+@using BlazorContacts.Data
+@using JsonSerializer = System.Text.Json.JsonSerializer
+@using System.Text.Json
+@inject HttpClient Http
+
+<h3>Contacts</h3>
+
+@if (contacts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <a href="/addContact" class="btn btn-light">Add Contact</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>State</th>
+                <th>Zip</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in contacts)
+            {
+                <tr>
+                    <td>@contact.Name</td>
+                    <td>@contact.State</td>
+                    <td>@contact.Zip</td>
+                    <td><button class="btn btn-light">Details</button><a href="/editContact/@contact.Id" class="btn btn-secondary">Edit</a><button class="btn btn-danger">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Contact> contacts;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var httpResponse = await Http.GetAsync("/contacts");
+
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            errorMessage = httpResponse.ReasonPhrase;
+            Console.WriteLine($"There was an error! {errorMessage}");
+            return;
+        }
+
+        contacts = await httpResponse.Content.ReadFromJsonAsync<List<Contact>>();
+    }
+}

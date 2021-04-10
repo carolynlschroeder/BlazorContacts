@@ -1,0 +1,84 @@
+﻿@page "/editContact/{Id:int}"
+@using BlazorContacts.Data
+@using System.Collections.Generic
+@using System.Net
+@inject NavigationManager NavManager
+@inject HttpClient Http
+<h3>Edit Contact</h3>
+@if (contact == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@contact" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <input type="hidden" @bind="contact.Id" />
+        <div class="form-group row">
+            <label class="col-md-2">Name</label>
+            <div class="col-md-10"><InputText @bind-Value=contact.Name></InputText></div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-2">Address</label>
+            <div class="col-md-10">
+                <InputText @bind-Value=contact.Address></InputText>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-2">City</label>
+            <div class="col-md-10">
+                <InputText @bind-Value=contact.City></InputText>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-2">State</label>
+            <div class="col-md-10">
+                <InputSelect @bind-Value=contact.State>
+                    <option value="">Select</option>
+                    @foreach (var s in states)
+                        {
+                        <option value="@s.Key">@s.Value</option>
+                        }
+                </InputSelect>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-2">Zip</label>
+            <div class="col-md-10">
+                <InputText @bind-Value=contact.Zip></InputText>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </EditForm>
+}
+
+@code {
+    Contact contact = new Contact();
+    Dictionary<string, string> states = Data.States.GetUSStates();
+    private string errorMessage;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await Http.GetAsync("/contacts/" + Id);
+        contact = await httpResponse.Content.ReadFromJsonAsync<Contact>();
+    }
+
+    public async Task HandleValidSubmit()
+    {
+        var httpResponse = await Http.PutAsJsonAsync("/contacts/" + Id, contact);
+
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            errorMessage = httpResponse.ReasonPhrase;
+            Console.WriteLine($"There was an error! {errorMessage}");
+            return;
+        }
+
+        NavManager.NavigateTo("/contacts");
+    }
+
+}

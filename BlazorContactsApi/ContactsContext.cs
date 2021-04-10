@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorContactsApi.Data;
 using Microsoft.EntityFrameworkCore;
-using Shared;
 
 namespace BlazorContactsApi
 {
