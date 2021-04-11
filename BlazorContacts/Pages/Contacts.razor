@@ -31,15 +31,7 @@ else
             {
                 <tr>
                     <td>
-                        @if (@contact.Id == contactDetailsId)
-                        {
-                            <img src="@ImageName" @onclick="@(async() => await GetContactDetails(contact.Id))" />
-                        }
-                        else
-                        {
-                            <img src="Images/toggle.png" @onclick="@(async() => await GetContactDetails(contact.Id))" />
-
-                        }
+                        <img src="@ImageName" @onclick="@(async() => await GetContactDetails(contact.Id))" />
                     </td>
                     <td>@contact.Name</td>
                     <td>@contact.State</td>
@@ -160,16 +152,8 @@ else
         }
         else
         {
-            if (showDetailStatus == 0)
-            {
-                ImageName = "Images/expand.png";
-                showDetailStatus = 1;
-            }
-            else
-            {
-                ImageName = "Images/toggle.png";
-                showDetailStatus = 0;
-            }
+            ImageName = "Images/toggle.png";
+            showDetailStatus = 0;
 
         }
         contactDetailsId = contactId;
