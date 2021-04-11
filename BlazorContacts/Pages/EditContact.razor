@@ -4,6 +4,7 @@
 @using System.Net
 @inject NavigationManager NavManager
 @inject HttpClient Http
+@inject IJSRuntime JS
 <h3>Edit Contact</h3>
 @if (contact == null)
 {
@@ -64,6 +65,12 @@ else
     protected override async Task OnInitializedAsync()
     {
         var httpResponse = await Http.GetAsync("/contacts/" + Id);
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            errorMessage = httpResponse.ReasonPhrase;
+            await JS.InvokeVoidAsync("alert", $"There was an error! {errorMessage}");
+            return;
+        }
         contact = await httpResponse.Content.ReadFromJsonAsync<Contact>();
     }
 
@@ -74,7 +81,7 @@ else
         if (!httpResponse.IsSuccessStatusCode)
         {
             errorMessage = httpResponse.ReasonPhrase;
-            Console.WriteLine($"There was an error! {errorMessage}");
+            await JS.InvokeVoidAsync("alert", $"There was an error! {errorMessage}");
             return;
         }
 

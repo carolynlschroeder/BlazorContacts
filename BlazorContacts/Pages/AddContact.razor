@@ -4,6 +4,7 @@
 @using System.Net
 @inject NavigationManager NavManager
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <h3>AddContact</h3>
 <EditForm Model="@contact" OnValidSubmit="@HandleValidSubmit">
@@ -60,6 +61,7 @@
         if (!httpResponse.IsSuccessStatusCode)
         {
             errorMessage = httpResponse.ReasonPhrase;
+            //await JS.InvokeVoidAsync("alert", $"There was an error! {errorMessage}");
             Console.WriteLine($"There was an error! {errorMessage}");
             return;
         }

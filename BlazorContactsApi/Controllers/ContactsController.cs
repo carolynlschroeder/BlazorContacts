@@ -29,7 +29,7 @@ namespace BlazorContactsApi.Controllers
         }
 
         // GET: api/Contacts/5
-        [HttpGet("{id}")]
+        [Microsoft.AspNetCore.Mvc.HttpGet("{id}", Name = "GetContact")]
         public async Task<ActionResult<Contact>> Get(int id)
         {
             var contact = await _context.Contacts.FindAsync(id);
@@ -67,10 +67,6 @@ namespace BlazorContactsApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
-        // POST: api/Contacts
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [Microsoft.AspNetCore.Mvc.HttpPost]
         public IActionResult Post([Microsoft.AspNetCore.Mvc.FromBody] Contact contact)
         {

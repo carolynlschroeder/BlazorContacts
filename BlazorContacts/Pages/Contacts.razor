@@ -3,7 +3,9 @@
 @using BlazorContacts.Data
 @using JsonSerializer = System.Text.Json.JsonSerializer
 @using System.Text.Json
+@using BlazorOrdering.Client
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <h3>Contacts</h3>
 
@@ -17,6 +19,7 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th></th>
                 <th>Name</th>
                 <th>State</th>
                 <th>Zip</th>
@@ -27,11 +30,75 @@ else
             @foreach (var contact in contacts)
             {
                 <tr>
+                    <td>
+                        @if (@contact.Id == contactDetailsId)
+                        {
+                            <img src="@ImageName" @onclick="@(async() => await GetContactDetails(contact.Id))" />
+                        }
+                        else
+                        {
+                            <img src="Images/toggle.png" @onclick="@(async() => await GetContactDetails(contact.Id))" />
+
+                        }
+                    </td>
                     <td>@contact.Name</td>
                     <td>@contact.State</td>
                     <td>@contact.Zip</td>
-                    <td><button class="btn btn-light">Details</button><a href="/editContact/@contact.Id" class="btn btn-secondary">Edit</a><button class="btn btn-danger">Delete</button></td>
+                    <td><a href="/editContact/@contact.Id" class="btn btn-secondary">Edit</a><button class="btn btn-danger" @onclick="@(() => DeleteContact(contact.Id))">Delete</button></td>
                 </tr>
+                @if (contactDetail != null)
+                {
+                    @if (showDetailStatus == 1)
+                    {
+                        @if (contact.Id == contactDetailsId)
+                        {
+                            <tr style="background-color: #3ADF00; color:#ffffff">
+                                <td colspan="6" class="text-center">
+                                    Contact Details for - <strong> @contact.Name </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">
+
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>
+                                                Name
+                                            </th>
+                                            <th>
+                                                Address
+                                            </th>
+                                            <th>
+                                                City
+                                            </th>
+                                            <th>
+                                                State
+                                            </th>
+                                            <th>
+                                                Zip
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>@contactDetail.Name</td>
+                                            <td>@contactDetail.Address</td>
+                                            <td>
+                                                @contactDetail.City
+                                            </td>
+                                            <td>@contactDetail.State</td>
+                                            <td>
+                                                @contactDetail.Zip
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
             }
         </tbody>
     </table>
@@ -40,18 +107,80 @@ else
 @code {
     private List<Contact> contacts;
     private string errorMessage;
+    private Contact contactDetail;
+
+    int showDetailStatus = 0;
+    int contactDetailsId = 0;
+    string ImageName = "Images/toggle.png";
 
     protected override async Task OnInitializedAsync()
+    {
+        await GetContacts();
+    }
+
+    private async Task GetContacts()
     {
         using var httpResponse = await Http.GetAsync("/contacts");
 
         if (!httpResponse.IsSuccessStatusCode)
         {
             errorMessage = httpResponse.ReasonPhrase;
-            Console.WriteLine($"There was an error! {errorMessage}");
+            await JS.InvokeVoidAsync("alert", $"There was an error! {errorMessage}");
             return;
         }
 
         contacts = await httpResponse.Content.ReadFromJsonAsync<List<Contact>>();
     }
+
+    public async Task DeleteContact(int contactId)
+    {
+        if (await JS.Confirm($"Delete this contact?"))
+        {
+            var httpResponse = await Http.DeleteAsync("/contacts/" + contactId);
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                errorMessage = httpResponse.ReasonPhrase;
+                await JS.InvokeVoidAsync("alert", $"There was an error! {errorMessage}");
+                return;
+            }
+
+            await GetContacts();
+
+        }
+    }
+
+    protected async Task GetContactDetails(int contactId)
+    {
+        if (contactDetailsId != contactId)
+        {
+            ImageName = "Images/expand.png";
+            showDetailStatus = 1;
+
+        }
+        else
+        {
+            if (showDetailStatus == 0)
+            {
+                ImageName = "Images/expand.png";
+                showDetailStatus = 1;
+            }
+            else
+            {
+                ImageName = "Images/toggle.png";
+                showDetailStatus = 0;
+            }
+
+        }
+        contactDetailsId = contactId;
+        contactDetail = await GetContact(contactId);
+
+    }
+
+    private async Task<Contact> GetContact(int id)
+    {
+        var httpResponse = await Http.GetAsync("/contacts/" + id);
+        return await httpResponse.Content.ReadFromJsonAsync<Contact>();
+    }
+
 }
