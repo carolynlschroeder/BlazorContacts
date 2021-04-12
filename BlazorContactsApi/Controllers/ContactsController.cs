@@ -21,14 +21,14 @@ namespace BlazorContactsApi.Controllers
             _context = context;
         }
 
-        // GET: api/Contacts
+        // GET: /Contacts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Contact>>> Get()
         {
             return await _context.Contacts.ToListAsync();
         }
 
-        // GET: api/Contacts/5
+        // GET: /Contacts/5
         [Microsoft.AspNetCore.Mvc.HttpGet("{id}", Name = "GetContact")]
         public async Task<ActionResult<Contact>> Get(int id)
         {
@@ -88,7 +88,7 @@ namespace BlazorContactsApi.Controllers
             }
         }
 
-        // DELETE: api/Contacts/5
+        // DELETE: /Contacts/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
@@ -102,11 +102,6 @@ namespace BlazorContactsApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool ContactExists(int id)
-        {
-            return _context.Contacts.Any(e => e.Id == id);
         }
     }
 }
