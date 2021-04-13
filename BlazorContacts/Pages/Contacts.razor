@@ -161,8 +161,16 @@ else
         }
         else
         {
-            ImageName = "Images/toggle.png";
-            showDetailStatus = 0;
+            if (showDetailStatus == 0)  
+            {  
+                ImageName = "Images/expand.png";  
+                showDetailStatus = 1;  
+            }  
+            else  
+            {  
+                ImageName = "Images/toggle.png";  
+                showDetailStatus = 0;  
+            }  
 
         }
         contactDetailsId = contactId;
