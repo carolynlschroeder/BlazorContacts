@@ -31,7 +31,6 @@ else
             {
                 <tr>
                     <td>
-                        @*<img src="@ImageName" @onclick="@(async() => await GetContactDetails(contact.Id))" />*@
                         @if (contact.Id == contactDetailsId)  
                         {  
                         <img src="@ImageName" @onclick="@(async() => await GetContactDetails(contact.Id))" /> 
