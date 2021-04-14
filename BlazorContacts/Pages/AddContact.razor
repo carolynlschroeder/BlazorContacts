@@ -61,8 +61,7 @@
         if (!httpResponse.IsSuccessStatusCode)
         {
             errorMessage = httpResponse.ReasonPhrase;
-            //await JS.InvokeVoidAsync("alert", $"There was an error! {errorMessage}");
-            Console.WriteLine($"There was an error! {errorMessage}");
+            await JS.InvokeVoidAsync("alert", $"There was an error! {errorMessage}");
             return;
         }
 

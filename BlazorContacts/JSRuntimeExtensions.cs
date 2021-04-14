@@ -1,7 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using System.Threading.Tasks;
 
-namespace BlazorOrdering.Client
+namespace BlazorContacts
 {
     public static class JSRuntimeExtensions
     {
